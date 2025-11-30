@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 
 class MovieRepository(private val movieService: MovieService) {
     private val apiKey = "6dc6cb9dd7e60e2827af4228638dd37b"
@@ -15,9 +16,13 @@ class MovieRepository(private val movieService: MovieService) {
     // returns Flow<List<Movie>>
     fun fetchMovies(): Flow<List<Movie>> {
         return flow {
-            // network call (suspend) - emit results
             val response = movieService.getPopularMovies(apiKey)
             emit(response.results)
-        }.flowOn(Dispatchers.IO)
+        }
+            .flowOn(Dispatchers.IO)
+            .map { movies ->
+                // SORTING (descending by popularity)
+                movies.sortedByDescending { it.popularity }
+            }
     }
 }
