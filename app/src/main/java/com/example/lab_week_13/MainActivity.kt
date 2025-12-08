@@ -1,18 +1,20 @@
-package com.example.test_lab_week_12
+package com.example.lab_week_13
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
-import com.example.test_lab_week_12.model.Movie
+import com.example.lab_week_13.model.Movie
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import java.util.Calendar
 import androidx.activity.ComponentActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.lab_week_13.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
 
@@ -27,7 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding: ActivityMainBinding = DataBindingUtil
+            .setContentView(this, R.layout.activity_main)
         val recyclerView: RecyclerView = findViewById(R.id.movie_list)
         recyclerView.adapter = movieAdapter
 
@@ -39,22 +42,12 @@ class MainActivity : AppCompatActivity() {
                     return MovieViewModel(movieRepository) as T
                 }
             })[MovieViewModel::class.java]
+        binding.viewModel = movieViewModel
+        binding.lifecycleOwner = this
+
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    movieViewModel.popularMovies.collect { movies ->
-                        movieAdapter.addMovies(movies)
-                    }
-                }
-                launch {
-                    movieViewModel.error.collect { error ->
-                        if (error.isNotEmpty()) {
-                            Snackbar.make(recyclerView, error, Snackbar.LENGTH_LONG).show()
-                        }
-                    }
-                }
-            }
+
         }
     }
 
